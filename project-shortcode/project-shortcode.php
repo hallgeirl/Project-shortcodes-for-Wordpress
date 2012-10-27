@@ -24,13 +24,24 @@ Version: 1.1
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-function create_header($title, $lang, $headerlevel)
+function create_subheader($title, $topheaderlevel)
 {
-    $header = "<h" . $headerlevel . ">";
-    if (!empty($lang))
-        $header .= "[" . $lang . "] ";
+    $headerlevel = $topheaderlevel+1;
+    $header = "<h" . $headerlevel . " style=\"margin-top: 0em; margin-bottom: 0.2em;\">";
 
     $header .=  $title;
+    $header .= "</h" . $headerlevel . ">\n";
+
+    return $header;
+}
+
+function create_header($title, $lang, $headerlevel)
+{
+    $header = "<h" . $headerlevel . " style=\"margin-bottom: 0.5em;\">";
+
+    $header .=  $title;
+    if (!empty($lang))
+        $header .= " (" . $lang . ")";
     $header .= "</h" . $headerlevel . ">\n";
 
     return $header;
@@ -47,20 +58,38 @@ function create_screenshot($url)
     return $result;
 }
 
-function create_screenshots($screenshots)
+function create_screenshots($screenshots, $topheaderlevel)
 {
     $result = "";
 
-    //Screenshots
     if (!empty($screenshots)) {
+        $result .= create_subheader("Screenshots:", $topheaderlevel);
+        $result .= "<p>";
         $ss = explode("|", $screenshots);
-        $result .= "<br />Screenshots:<br />";
         foreach($ss as $s) 
         {
-	    $result .= create_screenshot($s);
+    	    $result .= create_screenshot($s);
         }
+        $result .= "</p>";
     }
 
+    return $result;
+}
+
+function create_links($url, $repository, $headerlevel)
+{
+    $result = "";
+    if (!empty($url) || !empty($repository))
+    {
+        $result .= create_subheader("Links:", $headerlevel);
+        $result .= "<p>";
+
+        if (!empty($url))
+            $result .= "<a href=\"" . $url . "\">Download</a>\n";
+        if (!empty($repository))
+            $result .= "<a href=\"" . $repository . "\">Code repository</a>\n";
+        $result .= "</p>";
+    }
     return $result;
 }
 
@@ -68,27 +97,17 @@ function project_shortcode($atts, $content = null)
 {
     extract(shortcode_atts(array("url" => "", "repository" => "", "title" => "Untitled project", "headerlevel" => 3, "lang" => "", "screenshots" => ""), $atts));
     
-    if ($headerlevel <= 0) $headerlevel = 1;
+    if ($headerlevel <= 0) $headerlevel = 2;
     $result = create_header($title, $lang, $headerlevel);
     
-
-    if (!empty($url) || !empty($repository))
-    {
-        $result .= "<div>";
-
-        if (!empty($url))
-            $result .= "<a href=\"" . $url . "\">Download</a>\n";
-        if (!empty($repository))
-            $result .= "<a href=\"" . $repository . "\">Code repository</a>\n";
-        $result .= "</div>";
-    }
-
     $result .= "<p>";
     if (!empty($content))
         $result .= $content . "\n";
     
-    $result .= create_screenshots($screenshots);
+    $result .= create_screenshots($screenshots, $headerlevel);
   
+    $result .= create_links($url, $repository, $headerlevel);
+
     $result .= "</p>\n";
     
     return $result;
