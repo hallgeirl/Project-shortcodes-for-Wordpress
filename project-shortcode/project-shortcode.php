@@ -66,14 +66,23 @@ function create_screenshots($screenshots)
 
 function project_shortcode($atts, $content = null)
 {
-    extract(shortcode_atts(array("url" => "", "title" => "Untitled project", "headerlevel" => 3, "lang" => "", "screenshots" => ""), $atts));
+    extract(shortcode_atts(array("url" => "", "repository" => "", "title" => "Untitled project", "headerlevel" => 3, "lang" => "", "screenshots" => ""), $atts));
     
     if ($headerlevel <= 0) $headerlevel = 1;
     $result = create_header($title, $lang, $headerlevel);
     
-    if (!empty($url))
-        $result .= "<div><a href=\"" . $url . "\">Download</a></div>\n";
-    
+
+    if (!empty($url) || !empty($repository))
+    {
+        $result .= "<div>";
+
+        if (!empty($url))
+            $result .= "<a href=\"" . $url . "\">Download</a>\n";
+        if (!empty($repository))
+            $result .= "<a href=\"" . $repository . "\">Code repository</a>\n";
+        $result .= "</div>";
+    }
+
     $result .= "<p>";
     if (!empty($content))
         $result .= $content . "\n";
